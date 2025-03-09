@@ -30,22 +30,12 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors  
 
 def calculate_money_flow(tickers, period='5d', interval='1d'):
-    """
-    Calculate the money flow for a list of stocks using yfinance.
+   
     
-    Parameters:
-        tickers (list): List of stock symbols.
-        period (str): Time period to fetch data for (default: '5d').
-        interval (str): Data interval (default: '1d').
-    
-    Returns:
-        DataFrame: A DataFrame containing the money flow for each stock.
-    """
-    # Download data for all tickers at once
     data = yf.download(tickers, period=period, interval=interval)
     results = []
     
-    # Loop over each ticker to process its data individually
+    
     for ticker in tickers:
         if isinstance(data.columns, pd.MultiIndex):
             ticker_data = data.xs(ticker, axis=1, level=1)
