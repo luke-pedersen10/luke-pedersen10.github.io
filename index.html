@@ -4,9 +4,78 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GFG</title>
+    <title>Money Flow Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello World this is my first web page.</h1>
+    <h1>Python Code: Money Flow Calculation</h1>
+    <pre><code>import yfinance as yf
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors  
+
+def calculate_money_flow(tickers, period='5d', interval='1d'):
+    """
+    Calculate the money flow for a list of stocks using yfinance.
+    
+    Parameters:
+        tickers (list): List of stock symbols.
+        period (str): Time period to fetch data for (default: '5d').
+        interval (str): Data interval (default: '1d').
+    
+    Returns:
+        DataFrame: A DataFrame containing the money flow for each stock.
+    """
+    # Download data for all tickers at once
+    data = yf.download(tickers, period=period, interval=interval)
+    results = []
+    
+    # Loop over each ticker to process its data individually
+    for ticker in tickers:
+        if isinstance(data.columns, pd.MultiIndex):
+            ticker_data = data.xs(ticker, axis=1, level=1)
+        else:
+            ticker_data = data.copy()
+        
+        required_columns = ['High', 'Low', 'Close', 'Volume']
+        for col in required_columns:
+            if col not in ticker_data.columns:
+                raise KeyError(f"Missing expected column: {col} for ticker: {ticker}")
+        
+        ticker_data['Typical Price'] = (ticker_data['High'] + ticker_data['Low'] + ticker_data['Close']) / 3
+        ticker_data['Money Flow'] = ticker_data['Typical Price'] * ticker_data['Volume']
+        ticker_data['Ticker'] = ticker
+        results.append(ticker_data[['Ticker', 'Money Flow']].reset_index())
+    
+    result_df = pd.concat(results, ignore_index=True)
+    return result_df
+
+tickers = ['AAPL', 'MSFT', 'TSLA','GOOGL',"AMZN"]
+money_flow_data = calculate_money_flow(tickers)
+print(money_flow_data)
+
+heatmap_data = money_flow_data.pivot(index='Date', columns='Ticker', values='Money Flow')
+print(heatmap_data.head())
+
+plt.figure(figsize=(10, 6))
+sns.heatmap(heatmap_data, cmap='coolwarm', norm=mcolors.LogNorm())
+plt.title("Stock Money Flow Heat Map")
+plt.xticks(rotation=45)
+plt.show()</code></pre>
 </body>
 </html>
